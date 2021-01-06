@@ -5,14 +5,20 @@ import(Module_PopScript)
 import(Module_Game)
 import(Module_Objects)
 import(Module_Map)
+import(Module_Person)
 include("UtilPThings.lua")
 include("UtilRefs.lua")
+include("AIShaman.lua")
 
 computer_init_player(_gsi.Players[TRIBE_YELLOW])
 computer_init_player(_gsi.Players[TRIBE_PINK])
 
+ai_Tribes = {TRIBE_YELLOW, TRIBE_PINK}
+
 --Variables
 defendTimerUntilNewDefend = 240
+AIShamanYellow = AIShaman:new(nil, TRIBE_YELLOW, 1, 0, 0, 0, 0)
+AIShamanPink = AIShaman:new(nil, TRIBE_PINK, 1, 0, 0, 0, 0)
 
 spell_delay_yellow = 0
 smartCastsBlastYellow = 0
@@ -131,11 +137,9 @@ STATE_SET(TRIBE_YELLOW, TRUE, CP_AT_TYPE_HOUSE_A_PERSON)
 STATE_SET(TRIBE_YELLOW, TRUE, CP_AT_TYPE_PREACH)
 
 SET_BUCKET_USAGE(TRIBE_YELLOW, TRUE)
-SET_BUCKET_COUNT_FOR_SPELL(TRIBE_YELLOW, M_SPELL_BLAST, 8)
-SET_BUCKET_COUNT_FOR_SPELL(TRIBE_YELLOW, M_SPELL_CONVERT_WILD, 8)
 
-SET_SPELL_ENTRY(TRIBE_YELLOW, 0, M_SPELL_BLAST, 5000, 64, 1, 0)
-SET_SPELL_ENTRY(TRIBE_YELLOW, 1, M_SPELL_BLAST, 5000, 64, 1, 1)
+SET_SPELL_ENTRY(TRIBE_YELLOW, 0, M_SPELL_BLAST, SPELL_COST(M_SPELL_BLAST), 64, 1, 0)
+SET_SPELL_ENTRY(TRIBE_YELLOW, 1, M_SPELL_BLAST, SPELL_COST(M_SPELL_BLAST), 64, 1, 1)
 
 SET_DEFENCE_RADIUS(TRIBE_YELLOW, 8)
 
@@ -175,11 +179,9 @@ STATE_SET(TRIBE_PINK, TRUE, CP_AT_TYPE_TRAIN_PEOPLE)
 STATE_SET(TRIBE_PINK, TRUE, CP_AT_TYPE_HOUSE_A_PERSON)
 
 SET_BUCKET_USAGE(TRIBE_PINK, TRUE)
-SET_BUCKET_COUNT_FOR_SPELL(TRIBE_PINK, M_SPELL_BLAST, 8)
-SET_BUCKET_COUNT_FOR_SPELL(TRIBE_PINK, M_SPELL_CONVERT_WILD, 8)
 
-SET_SPELL_ENTRY(TRIBE_PINK, 0, M_SPELL_BLAST, 5000, 64, 1, 0)
-SET_SPELL_ENTRY(TRIBE_PINK, 1, M_SPELL_BLAST, 5000, 64, 1, 1)
+SET_SPELL_ENTRY(TRIBE_PINK, 0, M_SPELL_BLAST, SPELL_COST(M_SPELL_BLAST), 64, 1, 0)
+SET_SPELL_ENTRY(TRIBE_PINK, 1, M_SPELL_BLAST, SPELL_COST(M_SPELL_BLAST), 64, 1, 1)
 
 SET_DEFENCE_RADIUS(TRIBE_PINK, 8)
 
@@ -190,6 +192,18 @@ SHAMAN_DEFEND(TRIBE_PINK, pinkShamanDefX, pinkShamanDefZ, TRUE)
 SET_DRUM_TOWER_POS(TRIBE_PINK, 60, 152)
 
 function OnTurn()
+        if (everyPow(360, 1)) then
+            for aiNumber = 1, 2 do
+                if (_gsi.Players[ai_Tribes[aiNumber]].NumPeople < 79) then
+                    SET_BUCKET_COUNT_FOR_SPELL(ai_Tribes[aiNumber], M_SPELL_BLAST, 8)
+                    SET_BUCKET_COUNT_FOR_SPELL(ai_Tribes[aiNumber], M_SPELL_CONVERT_WILD, 8)
+                else
+                    SET_BUCKET_COUNT_FOR_SPELL(ai_Tribes[aiNumber], M_SPELL_BLAST, 4)
+                    SET_BUCKET_COUNT_FOR_SPELL(ai_Tribes[aiNumber], M_SPELL_CONVERT_WILD, 4)
+                end
+            end
+        end
+        
         --Reset defend values
         ResetYellowDefend()
         ResetGreenDefend()
@@ -203,7 +217,7 @@ function OnTurn()
             --Intelligent Defense for Yellow
             DefendBase(TRIBE_YELLOW, TRIBE_BLUE, 228, 80, 1, 6, 3, defendTimerUntilNewDefend)
             DefendBase(TRIBE_YELLOW, TRIBE_BLUE, 230, 110, 2, 6, 3, defendTimerUntilNewDefend)
-            DefendBase(TRIBE_YELLOW, TRIBE_BLUE, 190, 86, 11, 6, 3, defendTimerUntilNewDefend)
+            --[[DefendBase(TRIBE_YELLOW, TRIBE_BLUE, 190, 86, 11, 6, 3, defendTimerUntilNewDefend)
             DefendBase(TRIBE_YELLOW, TRIBE_BLUE, 208, 78, 12, 6, 3, defendTimerUntilNewDefend)
             DefendBase(TRIBE_YELLOW, TRIBE_BLUE, 194, 64, 13, 6, 3, defendTimerUntilNewDefend)
             DefendBase(TRIBE_YELLOW, TRIBE_BLUE, 170, 76, 14, 6, 3, defendTimerUntilNewDefend)
@@ -229,9 +243,9 @@ function OnTurn()
             DefendBase(TRIBE_YELLOW, TRIBE_PINK, 170, 76, 14, 6, 3, defendTimerUntilNewDefend)
             DefendBase(TRIBE_YELLOW, TRIBE_PINK, 158, 60, 15, 6, 3, defendTimerUntilNewDefend)
             DefendBase(TRIBE_YELLOW, TRIBE_PINK, 164, 104, 16, 6, 3, defendTimerUntilNewDefend)
-            DefendBase(TRIBE_YELLOW, TRIBE_PINK, 212, 98, 26, 6, 3, defendTimerUntilNewDefend)
+            DefendBase(TRIBE_YELLOW, TRIBE_PINK, 212, 98, 26, 6, 3, defendTimerUntilNewDefend)--]]
 
-            --Intelligent Defense for Pink
+           --[[ --Intelligent Defense for Pink
             DefendBase(TRIBE_PINK, TRIBE_BLUE, 22, 116, 3, 6, 3, defendTimerUntilNewDefend)
             DefendBase(TRIBE_PINK, TRIBE_BLUE, 40, 130, 17, 6, 3, defendTimerUntilNewDefend)
             DefendBase(TRIBE_PINK, TRIBE_BLUE, 70, 124, 18, 6, 3, defendTimerUntilNewDefend)
@@ -260,7 +274,7 @@ function OnTurn()
             DefendBase(TRIBE_PINK, TRIBE_YELLOW, 66, 178, 21, 6, 3, defendTimerUntilNewDefend)
             DefendBase(TRIBE_PINK, TRIBE_YELLOW, 38, 174, 22, 6, 3, defendTimerUntilNewDefend)
             DefendBase(TRIBE_PINK, TRIBE_YELLOW, 78, 194, 23, 6, 3, defendTimerUntilNewDefend)
-            DefendBase(TRIBE_PINK, TRIBE_YELLOW, 56, 194, 24, 6, 3, defendTimerUntilNewDefend)
+            DefendBase(TRIBE_PINK, TRIBE_YELLOW, 56, 194, 24, 6, 3, defendTimerUntilNewDefend)--]]
         end
 
         --Yellow attacks
@@ -329,7 +343,7 @@ function OnTurn()
         if (GetTurn() > shaman_tick_pink) then
             enemyTribePink = 0
             enemyToAttackPink = G_RANDOM(3)+1
-            attackTypePink = G_RANDOM(4)+1
+            attackTypePink = G_RANDOM(3)+1
 
             if (enemyToAttackPink == 1) then
                 enemyTribePink = TRIBE_YELLOW
@@ -377,7 +391,7 @@ function OnTurn()
                         end
                     end
                 --Attack only Braves + Shaman
-                elseif (attackTypePink == 2 or attackTypePink == 3) then
+                elseif (attackTypePink == 3) then
                     if (GetTurn() > shaman_tick_pink and _gsi.Players[TRIBE_PINK].NumPeople > 100 and IS_SHAMAN_AVAILABLE_FOR_ATTACK(TRIBE_PINK) and MANA(TRIBE_PINK) > 50000 and pinkDefended == 0) then
                         if(NAV_CHECK(TRIBE_PINK, enemyTribePink, ATTACK_BUILDING, M_BUILDING_TEPEE, 0)) then
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_BRAVE, 100)
@@ -410,7 +424,7 @@ function OnTurn()
                         end
                     end
                 --Attack mixed
-                elseif (attackTypePink == 4) then 
+                elseif (attackTypePink == 3) then 
                     if (GetTurn() > shaman_tick_pink and _gsi.Players[TRIBE_PINK].NumPeople > 100 and IS_SHAMAN_AVAILABLE_FOR_ATTACK(TRIBE_PINK) and MANA(TRIBE_PINK) > 50000 and PLAYERS_PEOPLE_OF_TYPE(TRIBE_PINK, M_PERSON_SPY) > 10 and pinkDefended == 0) then
                         if(NAV_CHECK(TRIBE_PINK, enemyTribePink, ATTACK_BUILDING, M_BUILDING_TEPEE, 0)) then
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_BRAVE, 90)
@@ -455,62 +469,8 @@ function OnTurn()
             end
         end
 
-        --Intelligent Shaman battles for Yellow
-        local shamanY = getShaman(TRIBE_YELLOW)
-        if (shamanY ~= nil) then
-            ProcessGlobalTypeList(T_PERSON, function(t)
-                   if (t.Owner ~= TRIBE_YELLOW) then
-                        if (get_world_dist_xyz(shamanY.Pos.D3, t.Pos.D3) < 3092 + shamanY.Pos.D3.Ypos*3 and (t.Model == M_PERSON_MEDICINE_MAN or t.Model == M_PERSON_RELIGIOUS)) then
-                            if (spell_delay_yellow == 0 and is_thing_on_ground(shamanY) == 1 and smartCastsBlastYellow < 4 and MANA(TRIBE_YELLOW) > 20000) then
-                            createThing(T_SPELL, M_SPELL_BLAST, shamanY.Owner, t.Pos.D3, false, false)
-                                                smartCastsBlastYellow = smartCastsBlastYellow+1
-              		                            spell_delay_yellow = 24
-              		                            return false
-            		                            end
-                            end
-                        end
-            return true
-            end)
-        end
-
-        --Intelligent Shaman battles for Pink
-        local shamanP = getShaman(TRIBE_PINK)
-        if (shamanP ~= nil) then
-            ProcessGlobalTypeList(T_PERSON, function(t)
-                if (t.Owner ~= TRIBE_PINK) then
-                    if (get_world_dist_xyz(shamanP.Pos.D3, t.Pos.D3) < 3092 + shamanP.Pos.D3.Ypos*3 and (t.Model == M_PERSON_MEDICINE_MAN or t.Model == M_PERSON_RELIGIOUS)) then
-                        if (spell_delay_pink == 0 and is_thing_on_ground(shamanP) == 1 and smartCastsBlastPink < 4 and MANA(TRIBE_PINK) > 20000) then
-                            createThing(T_SPELL, M_SPELL_BLAST, shamanP.Owner, t.Pos.D3, false, false)
-                                smartCastsBlastPink = smartCastsBlastPink+1
-              		            spell_delay_pink = 24
-              		            return false
-            		        end
-                         end
-                     end
-                    return true
-                end
-            )
-        end
-
-        -- Changing the spell delay every turn
-        if (spell_delay_yellow > 0) then
-            spell_delay_yellow = spell_delay_yellow - 1
-        end
-
-        -- Changing the spell delay every turn
-        if (spell_delay_pink > 0) then
-            spell_delay_pink = spell_delay_pink - 1
-        end
-
-        --Recharge smart casts of Blast
-        if (everyPow(96, 1)) then
-            if (smartCastsBlastYellow ~= 0) then
-                smartCastsBlastYellow = smartCastsBlastYellow -1
-            end
-            if (smartCastsBlastPink ~= 0) then
-                smartCastsBlastPink = smartCastsBlastPink -1
-            end
-        end
+        AIShamanYellow:smartCasting()
+        AIShamanPink:smartCasting()
 
         --Fill up empty patrols
         if (every2Pow(9)) then
@@ -554,11 +514,14 @@ function OnTurn()
         else
             SET_AUTO_HOUSE(TRIBE_ORANGE, FALSE)
         end
+
+        AIShamanYellow:rechargeSpells()
+        --AIShamanPink:rechargeSpells()
 end
 
 --Handle each AIs defences
 function DefendBase(tribe, enemyTribe, defendMarkerX, defendMarkerZ, marker, radius, defendersFractionOfAllUnits, defendTickCooldown)
-    local enemyCount = CountEnemyPeopleInArea(enemyTribe, defendMarkerX, defendMarkerZ, radius)
+    local enemyCount = CountEnemyPeopleInArea(tribe, enemyTribe, defendMarkerX, defendMarkerZ, radius)
     local myCount = CountMyPeopleInArea(tribe, defendMarkerX, defendMarkerZ, radius)
 
     --If there are enemies spotted around a marker check if you already have units there, if you have enough units then move Shaman only (otherwise she runs back to her tower) otherwise move Shaman and a force
@@ -627,14 +590,14 @@ function DefendBase(tribe, enemyTribe, defendMarkerX, defendMarkerZ, marker, rad
 end
 
 --Count enemy followers in area around location inside a radius (preferably around marker to combine with defences)
-function CountEnemyPeopleInArea(enemyTribe, defendMarkerX, defendMarkerZ, radius)
+function CountEnemyPeopleInArea(tribe, enemyTribe, defendMarkerX, defendMarkerZ, radius)
     local count = 0
     markerPos = MAP_XZ_2_WORLD_XYZ(defendMarkerX, defendMarkerZ)
 
       SearchMapCells(CIRCULAR, 0, 0, radius, world_coord3d_to_map_idx(markerPos), function(me)
         me.MapWhoList:processList(function (t)
           if (t.Type == T_PERSON) then
-            if (t.Owner == enemyTribe and t.State == S_PERSON_BEING_PREACHED) then
+            if (t.Owner == enemyTribe and t.State ~= S_PERSON_BEING_PREACHED and is_person_a_spy_disguised_as_me(t, tribe) == 0 ) then
               count = count+1
             end
           end
