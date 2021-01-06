@@ -33,14 +33,15 @@ function AIShaman:new (o, tribe, blastAllowed, lightningAllowed, ghostsAllowed, 
     return o
 end
 
-function AIShaman:smartCasting ()
+function AIShaman:handleShamanCombat ()
         local shaman = getShaman(self.tribe)
         local wasInFight = 0 --Use this to stop moving very far
         local shamanPos = MAP_XZ_2_WORLD_XYZ(shaman.Pos.D3.Xpos, shaman.Pos.D3.Zpos)
+        local enemyIWasFighting = 0
 
         if (shaman ~= nil) then
-            SearchMapCells(CIRCULAR, 0, 0, 10, world_coord3d_to_map_idx(shamanPos), function(t)
-                   if (t.Owner ~= self.tribe and (t.Model == M_PERSON_MEDICINE_MAN or t.Model == M_PERSON_RELIGIOUS)) then 
+            ProcessGlobalTypeList(T_PERSON, function(t)
+                   if (t.Owner ~= self.tribe and t.Model == M_PERSON_MEDICINE_MAN) then 
                         --Destroy ghost armies near me with swarm
                         if (get_world_dist_xyz(shaman.Pos.D3, t.Pos.D3) < 2400 + shaman.Pos.D3.Ypos*3 and t.Flags2 & TF2_THING_IS_A_GHOST_PERSON ~= 0 and self.insectPlagueAllowed == 1 and MANA(self.tribe) > self.manaCostInsectPlague and self.spellDelay == 0 and self.insectPlagueSpecialDelay == 0) then
                             if(is_thing_on_ground(shaman) == 1) then
@@ -60,14 +61,14 @@ function AIShaman:smartCasting ()
                                         local c2d = Coord2D.new()
                                         map_ptr_to_world_coord2d(me, c2d)
                                         command_person_go_to_coord2d(shaman, c2d)
+                                        enemyIWasFighting = t
                                         wasInFight = 1
                                         return false
                                     end
                                 return true
                                 end)
                             else
-                                if (wasInFight == 1) then
-                                    log("StopDodging")
+                                if (wasInFight == 1 and get_world_dist_xyz(enemyIWasFighting.Pos.D3, shaman.Pos.D3) >= 6000) then
                                     remove_all_persons_commands(shaman)
                                     wasInFight = 0
                                 end
@@ -79,14 +80,14 @@ function AIShaman:smartCasting ()
                                             local c2d = Coord2D.new()
                                             map_ptr_to_world_coord2d(me, c2d)
                                             command_person_go_to_coord2d(shaman, c2d)
+                                            enemyIWasFighting = t
                                             wasInFight = 1
                                             return false
                                         end
                                     return true
                                     end)
                             else
-                                if (wasInFight == 1) then
-                                    log("StopDodging")
+                                if (wasInFight == 1 and get_world_dist_xyz(enemyIWasFighting.Pos.D3, shaman.Pos.D3) >= 3092) then
                                     remove_all_persons_commands(shaman)
                                     wasInFight = 0
                                 end
@@ -125,7 +126,7 @@ function AIShaman:smartCasting ()
         end
 end
 
-function AIShaman:rechargeSpells()
+function AIShaman:checkSpellDelay()
         --Update spellDelay each turn
         if (self.spellDelay > 0) then
             self.spellDelay = self.spellDelay - 1
