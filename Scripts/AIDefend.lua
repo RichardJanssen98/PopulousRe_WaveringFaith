@@ -9,10 +9,10 @@ import(Module_Person)
 include("UtilPThings.lua")
 include("UtilRefs.lua")
 
-AIDefend = {tribe = 0, shamanDefaultDefX = 0, shamanDefaultDefZ = 0, defendTickCooldown = 0, defendersFractionOfAllUnits = 0}
+AIDefend = {tribe = 0, shamanDefaultDefX = 0, shamanDefaultDefZ = 0, defendTickCooldown = 0, defendersFractionOfAllUnits = 0, useBraves = 0, belowThisPopStartUsingBraves = 0}
 AIDefend.__index = AIDefend
 
-function AIDefend:new (o, tribe, shamanDefaultDefX, shamanDefaultDefZ, defendTickCooldown, defendersFractionOfAllUnits)
+function AIDefend:new (o, tribe, shamanDefaultDefX, shamanDefaultDefZ, defendTickCooldown, defendersFractionOfAllUnits, useBraves, belowThisPopStartUsingBraves)
     local o = o or {}
     setmetatable(o, AIDefend)
     o.tribe = tribe
@@ -20,6 +20,8 @@ function AIDefend:new (o, tribe, shamanDefaultDefX, shamanDefaultDefZ, defendTic
     o.shamanDefaultDefZ = shamanDefaultDefZ
     o.defendTickCooldown = defendTickCooldown
     o.defendersFractionOfAllUnits = defendersFractionOfAllUnits
+    o.useBraves = useBraves
+    o.belowThisPopStartUsingBraves = belowThisPopStartUsingBraves
 
     o.defended = 0
     o.defendTick = 0
@@ -34,15 +36,23 @@ function AIDefend:defendBase(enemyTribe, defendMarkerX, defendMarkerZ, marker, r
 
     --If there are enemies spotted around a marker check if you already have units there, if you have enough units then move Shaman only (otherwise she runs back to her tower) otherwise move Shaman and a force
     if (enemyCount > 0) then
-        if (self.defended == 0 and myCount > 12) then
-            self:sendDefendShaman(marker, defendMarkerX, defendMarkerZ)
-            self.defended = 1
-            self.defendTick = GetTurn() + self.defendTickCooldown
-        elseif (self.defended == 0 and myCount < 12) then
-            self:sendDefendShaman(marker, defendMarkerX, defendMarkerZ)
-            self:sendDefendForce(enemyTribe, defendMarkerX, defendMarkerZ, marker)
-            self.defended = 1
-            self.defendTick = GetTurn() + self.defendTickCooldown
+        if (self.useBraves == 1 and _gsi.Players[self.tribe].NumPeople < self.belowThisPopStartUsingBraves) then
+            if (self.defended == 0 and myCount > 12) then
+                self:sendDefendShaman(marker, defendMarkerX, defendMarkerZ)
+                self.defended = 1
+                self.defendTick = GetTurn() + self.defendTickCooldown
+            elseif (self.defended == 0 and myCount < 12) then
+                self:sendDefendShaman(marker, defendMarkerX, defendMarkerZ)
+                self:sendDefendForce(enemyTribe, defendMarkerX, defendMarkerZ, marker)
+                self.defended = 1
+                self.defendTick = GetTurn() + self.defendTickCooldown
+            end
+        elseif (self.useBraves == 0) then
+            if (self.defended == 0) then
+                self:sendDefendShaman(marker, defendMarkerX, defendMarkerZ)
+                self.defended = 1
+                self.defendTick = GetTurn() + self.defendTickCooldown
+            end
         end
     end
 end

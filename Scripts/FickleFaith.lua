@@ -20,8 +20,8 @@ ai_Tribes = {TRIBE_YELLOW, TRIBE_PINK}
 defendTimerUntilNewDefend = 240
 AIShamanYellow = AIShaman:new(nil, TRIBE_YELLOW, 1, 0, 0, 0, 0)
 AIShamanPink = AIShaman:new(nil, TRIBE_PINK, 1, 0, 0, 0, 0)
-AIDefendYellow = AIDefend:new(nil, TRIBE_YELLOW, 174, 76, 240, 3)
-AIDefendPink = AIDefend:new(nil, TRIBE_PINK, 60, 152, 240, 3)
+AIDefendYellow = AIDefend:new(nil, TRIBE_YELLOW, 174, 76, 240, 3, 1, 500)
+AIDefendPink = AIDefend:new(nil, TRIBE_PINK, 60, 152, 240, 3, 1, 500)
 
 shaman_tick_yellow = GetTurn() + (2048 + G_RANDOM(2048))
 shaman_tick_pink = GetTurn() + (2048 + G_RANDOM(2048))
@@ -236,7 +236,6 @@ function OnTurn()
                         WRITE_CP_ATTRIB(TRIBE_YELLOW, ATTR_AWAY_MEDICINE_MAN, 100)
                         WRITE_CP_ATTRIB(TRIBE_YELLOW, ATTR_AWAY_BRAVE, 65)
                         WRITE_CP_ATTRIB(TRIBE_YELLOW, ATTR_AWAY_SPY, 0)
-                        log("Yellow Spy Attack")
                         shaman_tick_yellow = GetTUrn() + 360 + G_RANDOM(360)
                     end
                 end
@@ -245,21 +244,18 @@ function OnTurn()
                     if (NAV_CHECK(TRIBE_YELLOW, enemyTribeYellow, ATTACK_BUILDING, M_BUILDING_TEPEE, 0)) then
                         WRITE_CP_ATTRIB(TRIBE_YELLOW, ATTR_AWAY_RELIGIOUS, 35)
                         ATTACK(TRIBE_YELLOW, enemyTribeYellow, 16+G_RANDOM(20), ATTACK_BUILDING, -1, 450+G_RANDOM(550), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 27, -1, -1)
-                        log("Yellow attack 3")
                         shaman_tick_yellow = GetTurn() + (3300 + G_RANDOM(2048))
                     end
                 elseif (GetTurn() > shaman_tick_yellow and _gsi.Players[TRIBE_YELLOW].NumPeople > 65 and PLAYERS_PEOPLE_OF_TYPE(TRIBE_YELLOW, M_PERSON_RELIGIOUS) > 6 and IS_SHAMAN_AVAILABLE_FOR_ATTACK(TRIBE_YELLOW) and MANA(TRIBE_YELLOW) > 50000 and yellowDefended == 0) then
                     if (NAV_CHECK(TRIBE_YELLOW, enemyTribeYellow, ATTACK_BUILDING, M_BUILDING_TEPEE, 0)) then
                         WRITE_CP_ATTRIB(TRIBE_YELLOW, ATTR_AWAY_RELIGIOUS, 35)
                         ATTACK(TRIBE_YELLOW, enemyTribeYellow, 10+G_RANDOM(15), ATTACK_BUILDING, -1, 350+G_RANDOM(350), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 27, -1, -1)
-                        log("Yellow attack 2")
                         shaman_tick_yellow = GetTurn() + (2800 + G_RANDOM(2048))
                     end
                 elseif (GetTurn() > shaman_tick_yellow and _gsi.Players[TRIBE_YELLOW].NumPeople > 40 and PLAYERS_PEOPLE_OF_TYPE(TRIBE_YELLOW, M_PERSON_RELIGIOUS) > 4 and IS_SHAMAN_AVAILABLE_FOR_ATTACK(TRIBE_YELLOW) and MANA(TRIBE_YELLOW) > 50000 and yellowDefended == 0) then
                     if (NAV_CHECK(TRIBE_YELLOW, enemyTribeYellow, ATTACK_BUILDING, M_BUILDING_TEPEE, 0)) then
                         WRITE_CP_ATTRIB(TRIBE_YELLOW, ATTR_AWAY_RELIGIOUS, 35)
                         ATTACK(TRIBE_YELLOW, enemyTribeYellow, 6+G_RANDOM(9), ATTACK_BUILDING, -1, 250+G_RANDOM(250), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 27, -1, -1)
-                        log("Yellow attack 1")
                         shaman_tick_yellow = GetTurn() + (2048 + G_RANDOM(2048))
                     end
                 end
@@ -296,7 +292,6 @@ function OnTurn()
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_MEDICINE_MAN, 0)
                             ATTACK(TRIBE_PINK, enemyTribePink, 6+G_RANDOM(6), ATTACK_BUILDING, -1, 450+G_RANDOM(550), 0, 0, 0, ATTACK_NORMAL, 0, 25, -1, -1)
 
-                            log("Pink attack Spies 2")
                             shaman_tick_pink = GetTurn() + (3000 + G_RANDOM(2048))
 
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_BRAVE, 100)
@@ -310,7 +305,6 @@ function OnTurn()
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_MEDICINE_MAN, 0)
                             ATTACK(TRIBE_PINK, enemyTribePink, 2+G_RANDOM(3), ATTACK_BUILDING, -1, 250+G_RANDOM(750), 0, 0, 0, ATTACK_NORMAL, 0, 25, -1, -1)
 
-                            log("Pink attack Spies 1")
                             shaman_tick_pink = GetTurn() + (2048 + G_RANDOM(2048))
 
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_BRAVE, 100)
@@ -327,7 +321,6 @@ function OnTurn()
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_MEDICINE_MAN, 100)
                             ATTACK(TRIBE_PINK, enemyTribePink, 25 + G_RANDOM(26), ATTACK_BUILDING, -1, 600+G_RANDOM(400), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 28, -1, -1)
 
-                            log("Pink attack Braves 3")
                             shaman_tick_pink = GetTurn() + (3600 + G_RANDOM(2048))
                         end
                     elseif (GetTurn() > shaman_tick_pink and _gsi.Players[TRIBE_PINK].NumPeople > 70 and IS_SHAMAN_AVAILABLE_FOR_ATTACK(TRIBE_PINK) and MANA(TRIBE_PINK) > 50000 and pinkDefended == 0) then
@@ -337,7 +330,6 @@ function OnTurn()
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_MEDICINE_MAN, 100)
                             ATTACK(TRIBE_PINK, enemyTribePink, 15 + G_RANDOM(16), ATTACK_BUILDING, -1, 450+G_RANDOM(450), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 28, -1, -1)
 
-                            log("Pink attack Braves 2")
                             shaman_tick_pink = GetTurn() + (2700 + G_RANDOM(2048))
                         end
                     elseif (GetTurn() > shaman_tick_pink and _gsi.Players[TRIBE_PINK].NumPeople > 40 and IS_SHAMAN_AVAILABLE_FOR_ATTACK(TRIBE_PINK) and MANA(TRIBE_PINK) > 50000 and pinkDefended == 0) then
@@ -347,7 +339,6 @@ function OnTurn()
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_MEDICINE_MAN, 100)
                             ATTACK(TRIBE_PINK, enemyTribePink, 10 + G_RANDOM(11), ATTACK_BUILDING, -1, 350+G_RANDOM(350), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 28, -1, -1)
 
-                            log("Pink attack Braves 1")
                             shaman_tick_pink = GetTurn() + (2048 + G_RANDOM(2048))
                         end
                     end
@@ -360,7 +351,6 @@ function OnTurn()
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_MEDICINE_MAN, 100)
                             ATTACK(TRIBE_PINK, enemyTribePink, 25 + G_RANDOM(26), ATTACK_BUILDING, -1, 600+G_RANDOM(400), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 28, -1, -1)
 
-                            log("Pink attack Mixed 3")
                             shaman_tick_pink = GetTurn() + (3600 + G_RANDOM(2048))
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_BRAVE, 100)
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_SPY, 0)
@@ -373,7 +363,6 @@ function OnTurn()
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_MEDICINE_MAN, 100)
                             ATTACK(TRIBE_PINK, enemyTribePink, 15 + G_RANDOM(16), ATTACK_BUILDING, -1, 450+G_RANDOM(450), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 28, -1, -1)
 
-                            log("Pink attack Mixed 2")
                             shaman_tick_pink = GetTurn() + (2700 + G_RANDOM(2048))
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_BRAVE, 100)
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_SPY, 0)
@@ -386,7 +375,6 @@ function OnTurn()
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_MEDICINE_MAN, 100)
                             ATTACK(TRIBE_PINK, enemyTribePink, 10 + G_RANDOM(11), ATTACK_BUILDING, -1, 350+G_RANDOM(350), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 28, -1, -1)
 
-                            log("Pink attack Mixed 1")
                             shaman_tick_pink = GetTurn() + (2048 + G_RANDOM(2048))
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_BRAVE, 100)
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_SPY, 0)
