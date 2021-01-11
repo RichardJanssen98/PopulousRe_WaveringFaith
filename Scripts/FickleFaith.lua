@@ -23,8 +23,11 @@ AIShamanPink = AIShaman:new(nil, TRIBE_PINK, 1, 0, 0, 0, 0)
 AIDefendYellow = AIDefend:new(nil, TRIBE_YELLOW, 174, 76, 240, 3, 1, 500)
 AIDefendPink = AIDefend:new(nil, TRIBE_PINK, 60, 152, 240, 3, 1, 500)
 
-shaman_tick_yellow = GetTurn() + (2048 + G_RANDOM(2048))
-shaman_tick_pink = GetTurn() + (2048 + G_RANDOM(2048))
+yellowDefended = 0
+pinkDefended = 0
+
+shaman_tick_yellow = GetTurn() + (1024 + G_RANDOM(2048))
+shaman_tick_pink = GetTurn() + (1024 + G_RANDOM(2048))
 
 botSpellsPink = {M_SPELL_CONVERT_WILD,
                     M_SPELL_BLAST
@@ -139,6 +142,8 @@ function OnTurn()
         --Reset defend timers for all AIs
        AIDefendYellow:resetDefend()
        AIDefendPink:resetDefend()
+       yellowDefended = AIDefendYellow:getDefended()
+       pinkDefended = AIDefendPink:getDefended()
 
         --Put a delay on defending to reduce lag
         if (everyPow(36, 1)) then
@@ -210,7 +215,6 @@ function OnTurn()
         if (GetTurn() > shaman_tick_yellow) then
             enemyTribeYellow = 0
             enemyToAttackYellow = G_RANDOM(3)+1
-            local yellowPreachers = PLAYERS_PEOPLE_OF_TYPE(TRIBE_YELLOW, M_PERSON_RELIGIOUS)
 
             if (enemyToAttackYellow == 1) then
                 enemyTribeYellow = TRIBE_PINK
@@ -246,14 +250,14 @@ function OnTurn()
                         ATTACK(TRIBE_YELLOW, enemyTribeYellow, 16+G_RANDOM(20), ATTACK_BUILDING, -1, 450+G_RANDOM(550), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 27, -1, -1)
                         shaman_tick_yellow = GetTurn() + (3300 + G_RANDOM(2048))
                     end
-                elseif (GetTurn() > shaman_tick_yellow and _gsi.Players[TRIBE_YELLOW].NumPeople > 65 and PLAYERS_PEOPLE_OF_TYPE(TRIBE_YELLOW, M_PERSON_RELIGIOUS) > 6 and IS_SHAMAN_AVAILABLE_FOR_ATTACK(TRIBE_YELLOW) and MANA(TRIBE_YELLOW) > 50000 and yellowDefended == 0) then
-                    if (NAV_CHECK(TRIBE_YELLOW, enemyTribeYellow, ATTACK_BUILDING, M_BUILDING_TEPEE, 0)) then
+                elseif (GetTurn() > shaman_tick_yellow and _gsi.Players[TRIBE_YELLOW].NumPeople > 65 and PLAYERS_PEOPLE_OF_TYPE(TRIBE_YELLOW, M_PERSON_RELIGIOUS) > 6 and IS_SHAMAN_AVAILABLE_FOR_ATTACK(TRIBE_YELLOW) and MANA(TRIBE_YELLOW) > 50000 and yellowDefended == 0) then   
+                if (NAV_CHECK(TRIBE_YELLOW, enemyTribeYellow, ATTACK_BUILDING, M_BUILDING_TEPEE, 0)) then
                         WRITE_CP_ATTRIB(TRIBE_YELLOW, ATTR_AWAY_RELIGIOUS, 35)
                         ATTACK(TRIBE_YELLOW, enemyTribeYellow, 10+G_RANDOM(15), ATTACK_BUILDING, -1, 350+G_RANDOM(350), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 27, -1, -1)
                         shaman_tick_yellow = GetTurn() + (2800 + G_RANDOM(2048))
                     end
                 elseif (GetTurn() > shaman_tick_yellow and _gsi.Players[TRIBE_YELLOW].NumPeople > 40 and PLAYERS_PEOPLE_OF_TYPE(TRIBE_YELLOW, M_PERSON_RELIGIOUS) > 4 and IS_SHAMAN_AVAILABLE_FOR_ATTACK(TRIBE_YELLOW) and MANA(TRIBE_YELLOW) > 50000 and yellowDefended == 0) then
-                    if (NAV_CHECK(TRIBE_YELLOW, enemyTribeYellow, ATTACK_BUILDING, M_BUILDING_TEPEE, 0)) then
+                if (NAV_CHECK(TRIBE_YELLOW, enemyTribeYellow, ATTACK_BUILDING, M_BUILDING_TEPEE, 0)) then
                         WRITE_CP_ATTRIB(TRIBE_YELLOW, ATTR_AWAY_RELIGIOUS, 35)
                         ATTACK(TRIBE_YELLOW, enemyTribeYellow, 6+G_RANDOM(9), ATTACK_BUILDING, -1, 250+G_RANDOM(250), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 27, -1, -1)
                         shaman_tick_yellow = GetTurn() + (2048 + G_RANDOM(2048))
@@ -276,8 +280,6 @@ function OnTurn()
             elseif (enemyToAttackPink == 3) then
                 enemyTribePink = TRIBE_RED
             end
-
-            local pinkSpies = PLAYERS_PEOPLE_OF_TYPE(TRIBE_PINK, M_PERSON_SPY)
         end
 
         --Check if the enemy has a building to target
@@ -313,7 +315,7 @@ function OnTurn()
                         end
                     end
                 --Attack only Braves + Shaman
-                elseif (attackTypePink == 3) then
+                elseif (attackTypePink == 2) then
                     if (GetTurn() > shaman_tick_pink and _gsi.Players[TRIBE_PINK].NumPeople > 100 and IS_SHAMAN_AVAILABLE_FOR_ATTACK(TRIBE_PINK) and MANA(TRIBE_PINK) > 50000 and pinkDefended == 0) then
                         if(NAV_CHECK(TRIBE_PINK, enemyTribePink, ATTACK_BUILDING, M_BUILDING_TEPEE, 0)) then
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_BRAVE, 100)

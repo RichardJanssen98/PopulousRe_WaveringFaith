@@ -36,10 +36,12 @@ end
 function AIShaman:handleShamanCombat ()
         local shaman = getShaman(self.tribe)
         local wasInFight = 0 --Use this to stop moving very far
-        local shamanPos = MAP_XZ_2_WORLD_XYZ(shaman.Pos.D3.Xpos, shaman.Pos.D3.Zpos)
+        
         local enemyIWasFighting = 0
 
         if (shaman ~= nil) then
+            local shamanPos = MAP_XZ_2_WORLD_XYZ(shaman.Pos.D3.Xpos, shaman.Pos.D3.Zpos)
+
             ProcessGlobalTypeList(T_PERSON, function(t)
                    if (t.Owner ~= self.tribe and t.Model == M_PERSON_MEDICINE_MAN) then 
                         --Destroy ghost armies near me with swarm
@@ -56,38 +58,40 @@ function AIShaman:handleShamanCombat ()
                         --Dodge lightning if needed, otherwise only try to dodge blast
                         if (self.dodgeLightning == 1) then
                             if (get_world_dist_xyz(t.Pos.D3, shaman.Pos.D3) < 6000 + t.Pos.D3.Ypos*3 and t.Model == M_PERSON_MEDICINE_MAN) then  
+                                enemyIWasFighting = t
+                                wasInFight = 1
                                 SearchMapCells(CIRCULAR, 0, 0, 1, world_coord3d_to_map_idx(shamanPos), function(me)
                                     if (is_map_elem_coast(me) > 0 or is_map_elem_all_land(me) > 0) then
                                         local c2d = Coord2D.new()
                                         map_ptr_to_world_coord2d(me, c2d)
                                         command_person_go_to_coord2d(shaman, c2d)
-                                        enemyIWasFighting = t
-                                        wasInFight = 1
                                         return false
                                     end
                                 return true
                                 end)
-                            else
-                                if (wasInFight == 1 and get_world_dist_xyz(enemyIWasFighting.Pos.D3, shaman.Pos.D3) >= 6000) then
+                            end
+                            if (enemyIWasFighting ~= 0) then
+                                if ((wasInFight == 1 and get_world_dist_xyz(enemyIWasFighting.Pos.D3, shaman.Pos.D3) >= 6000) or is_thing_on_ground(shaman) ~= 1 or is_thing_on_ground(enemyIWasFighting) ~= 1) then
                                     remove_all_persons_commands(shaman)
                                     wasInFight = 0
                                 end
                             end
                         else   
                             if (get_world_dist_xyz(t.Pos.D3, shaman.Pos.D3) < 3092 + t.Pos.D3.Ypos*3 and t.Model == M_PERSON_MEDICINE_MAN) then 
+                                enemyIWasFighting = t
+                                wasInFight = 1
                                     SearchMapCells(CIRCULAR, 0, 0, 1, world_coord3d_to_map_idx(shamanPos), function(me)
                                         if (is_map_elem_coast(me) > 0 or is_map_elem_all_land(me) > 0) then
                                             local c2d = Coord2D.new()
                                             map_ptr_to_world_coord2d(me, c2d)
                                             command_person_go_to_coord2d(shaman, c2d)
-                                            enemyIWasFighting = t
-                                            wasInFight = 1
                                             return false
                                         end
                                     return true
                                     end)
-                            else
-                                if (wasInFight == 1 and get_world_dist_xyz(enemyIWasFighting.Pos.D3, shaman.Pos.D3) >= 3092) then
+                            end
+                            if (enemyIWasFighting ~= 0) then
+                                if ((wasInFight == 1 and get_world_dist_xyz(enemyIWasFighting.Pos.D3, shaman.Pos.D3) >= 3092) or is_thing_on_ground(shaman) ~= 1 or is_thing_on_ground(enemyIWasFighting) ~= 1) then
                                     remove_all_persons_commands(shaman)
                                     wasInFight = 0
                                 end

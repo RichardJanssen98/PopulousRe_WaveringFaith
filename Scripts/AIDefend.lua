@@ -108,6 +108,10 @@ function AIDefend:sendDefendShaman(marker, defendMarkerX, defendMarkerZ)
     SHAMAN_DEFEND(self.tribe, defendMarkerX, defendMarkerZ, TRUE)
 end
 
+function AIDefend:getDefended()
+    return self.defended
+end
+
 --Send defence force
 function AIDefend:sendDefendForce(enemyTribe, defendMarkerX, defendMarkerZ, marker)
     local defendAmount = _gsi.Players[self.tribe].NumPeople//self.defendersFractionOfAllUnits
