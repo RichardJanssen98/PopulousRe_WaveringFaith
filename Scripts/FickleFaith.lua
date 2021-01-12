@@ -20,14 +20,18 @@ ai_Tribes = {TRIBE_YELLOW, TRIBE_PINK}
 defendTimerUntilNewDefend = 240
 AIShamanYellow = AIShaman:new(nil, TRIBE_YELLOW, 1, 0, 0, 0, 0)
 AIShamanPink = AIShaman:new(nil, TRIBE_PINK, 1, 0, 0, 0, 0)
-AIDefendYellow = AIDefend:new(nil, TRIBE_YELLOW, 174, 76, 240, 3, 1, 500)
-AIDefendPink = AIDefend:new(nil, TRIBE_PINK, 60, 152, 240, 3, 1, 500)
+AIDefendYellow = AIDefend:new(nil, TRIBE_YELLOW, 174, 76, 240, 3, 1, 500, 1)
+AIDefendPink = AIDefend:new(nil, TRIBE_PINK, 60, 152, 240, 3, 1, 500, 0)
 
 yellowDefended = 0
 pinkDefended = 0
 
 shaman_tick_yellow = GetTurn() + (1024 + G_RANDOM(2048))
 shaman_tick_pink = GetTurn() + (1024 + G_RANDOM(2048))
+
+--Ally Red and Blue since the World Editor alliances don't seem to carry over to the game.
+set_players_allied(TRIBE_BLUE, TRIBE_RED)
+set_players_allied(TRIBE_RED, TRIBE_BLUE)
 
 botSpellsPink = {M_SPELL_CONVERT_WILD,
                     M_SPELL_BLAST
@@ -247,18 +251,24 @@ function OnTurn()
                 if (GetTurn() > shaman_tick_yellow and _gsi.Players[TRIBE_YELLOW].NumPeople > 80 and PLAYERS_PEOPLE_OF_TYPE(TRIBE_YELLOW, M_PERSON_RELIGIOUS) > 6 and IS_SHAMAN_AVAILABLE_FOR_ATTACK(TRIBE_YELLOW) and MANA(TRIBE_YELLOW) > 50000 and yellowDefended == 0) then
                     if (NAV_CHECK(TRIBE_YELLOW, enemyTribeYellow, ATTACK_BUILDING, M_BUILDING_TEPEE, 0)) then
                         WRITE_CP_ATTRIB(TRIBE_YELLOW, ATTR_AWAY_RELIGIOUS, 35)
+                        WRITE_CP_ATTRIB(TRIBE_YELLOW, ATTR_AWAY_BRAVE, 65)
+                        WRITE_CP_ATTRIB(TRIBE_YELLOW, ATTR_AWAY_MEDICINE_MAN, 100)
                         ATTACK(TRIBE_YELLOW, enemyTribeYellow, 16+G_RANDOM(20), ATTACK_BUILDING, -1, 450+G_RANDOM(550), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 27, -1, -1)
                         shaman_tick_yellow = GetTurn() + (3300 + G_RANDOM(2048))
                     end
                 elseif (GetTurn() > shaman_tick_yellow and _gsi.Players[TRIBE_YELLOW].NumPeople > 65 and PLAYERS_PEOPLE_OF_TYPE(TRIBE_YELLOW, M_PERSON_RELIGIOUS) > 6 and IS_SHAMAN_AVAILABLE_FOR_ATTACK(TRIBE_YELLOW) and MANA(TRIBE_YELLOW) > 50000 and yellowDefended == 0) then   
                 if (NAV_CHECK(TRIBE_YELLOW, enemyTribeYellow, ATTACK_BUILDING, M_BUILDING_TEPEE, 0)) then
                         WRITE_CP_ATTRIB(TRIBE_YELLOW, ATTR_AWAY_RELIGIOUS, 35)
+                        WRITE_CP_ATTRIB(TRIBE_YELLOW, ATTR_AWAY_BRAVE, 65)
+                        WRITE_CP_ATTRIB(TRIBE_YELLOW, ATTR_AWAY_MEDICINE_MAN, 100)
                         ATTACK(TRIBE_YELLOW, enemyTribeYellow, 10+G_RANDOM(15), ATTACK_BUILDING, -1, 350+G_RANDOM(350), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 27, -1, -1)
                         shaman_tick_yellow = GetTurn() + (2800 + G_RANDOM(2048))
                     end
                 elseif (GetTurn() > shaman_tick_yellow and _gsi.Players[TRIBE_YELLOW].NumPeople > 40 and PLAYERS_PEOPLE_OF_TYPE(TRIBE_YELLOW, M_PERSON_RELIGIOUS) > 4 and IS_SHAMAN_AVAILABLE_FOR_ATTACK(TRIBE_YELLOW) and MANA(TRIBE_YELLOW) > 50000 and yellowDefended == 0) then
                 if (NAV_CHECK(TRIBE_YELLOW, enemyTribeYellow, ATTACK_BUILDING, M_BUILDING_TEPEE, 0)) then
                         WRITE_CP_ATTRIB(TRIBE_YELLOW, ATTR_AWAY_RELIGIOUS, 35)
+                        WRITE_CP_ATTRIB(TRIBE_YELLOW, ATTR_AWAY_BRAVE, 65)
+                        WRITE_CP_ATTRIB(TRIBE_YELLOW, ATTR_AWAY_MEDICINE_MAN, 100)
                         ATTACK(TRIBE_YELLOW, enemyTribeYellow, 6+G_RANDOM(9), ATTACK_BUILDING, -1, 250+G_RANDOM(250), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 27, -1, -1)
                         shaman_tick_yellow = GetTurn() + (2048 + G_RANDOM(2048))
                     end
@@ -348,8 +358,8 @@ function OnTurn()
                 elseif (attackTypePink == 3) then 
                     if (GetTurn() > shaman_tick_pink and _gsi.Players[TRIBE_PINK].NumPeople > 100 and IS_SHAMAN_AVAILABLE_FOR_ATTACK(TRIBE_PINK) and MANA(TRIBE_PINK) > 50000 and PLAYERS_PEOPLE_OF_TYPE(TRIBE_PINK, M_PERSON_SPY) > 10 and pinkDefended == 0) then
                         if(NAV_CHECK(TRIBE_PINK, enemyTribePink, ATTACK_BUILDING, M_BUILDING_TEPEE, 0)) then
-                            WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_BRAVE, 90)
-                            WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_SPY, 10)
+                            WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_BRAVE, 85)
+                            WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_SPY, 15)
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_MEDICINE_MAN, 100)
                             ATTACK(TRIBE_PINK, enemyTribePink, 25 + G_RANDOM(26), ATTACK_BUILDING, -1, 600+G_RANDOM(400), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 28, -1, -1)
 
@@ -360,8 +370,8 @@ function OnTurn()
                         end
                     elseif (GetTurn() > shaman_tick_pink and _gsi.Players[TRIBE_PINK].NumPeople > 70 and IS_SHAMAN_AVAILABLE_FOR_ATTACK(TRIBE_PINK) and MANA(TRIBE_PINK) > 50000 and PLAYERS_PEOPLE_OF_TYPE(TRIBE_PINK, M_PERSON_SPY) > 8 and pinkDefended == 0) then
                         if(NAV_CHECK(TRIBE_PINK, enemyTribePink, ATTACK_BUILDING, M_BUILDING_TEPEE, 0)) then
-                            WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_BRAVE, 90)
-                            WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_SPY, 10)
+                            WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_BRAVE, 85)
+                            WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_SPY, 15)
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_MEDICINE_MAN, 100)
                             ATTACK(TRIBE_PINK, enemyTribePink, 15 + G_RANDOM(16), ATTACK_BUILDING, -1, 450+G_RANDOM(450), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 28, -1, -1)
 
@@ -372,8 +382,8 @@ function OnTurn()
                         end
                     elseif (GetTurn() > shaman_tick_pink and _gsi.Players[TRIBE_PINK].NumPeople > 40 and IS_SHAMAN_AVAILABLE_FOR_ATTACK(TRIBE_PINK) and MANA(TRIBE_PINK) > 50000 and PLAYERS_PEOPLE_OF_TYPE(TRIBE_PINK, M_PERSON_SPY) > 4 and pinkDefended == 0) then
                         if(NAV_CHECK(TRIBE_PINK, enemyTribePink, ATTACK_BUILDING, M_BUILDING_TEPEE, 0)) then
-                            WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_BRAVE, 90)
-                            WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_SPY, 10)
+                            WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_BRAVE, 85)
+                            WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_SPY, 15)
                             WRITE_CP_ATTRIB(TRIBE_PINK, ATTR_AWAY_MEDICINE_MAN, 100)
                             ATTACK(TRIBE_PINK, enemyTribePink, 10 + G_RANDOM(11), ATTACK_BUILDING, -1, 350+G_RANDOM(350), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, 28, -1, -1)
 

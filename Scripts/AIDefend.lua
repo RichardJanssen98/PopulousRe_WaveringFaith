@@ -9,10 +9,10 @@ import(Module_Person)
 include("UtilPThings.lua")
 include("UtilRefs.lua")
 
-AIDefend = {tribe = 0, shamanDefaultDefX = 0, shamanDefaultDefZ = 0, defendTickCooldown = 0, defendersFractionOfAllUnits = 0, useBraves = 0, belowThisPopStartUsingBraves = 0}
+AIDefend = {tribe = 0, shamanDefaultDefX = 0, shamanDefaultDefZ = 0, defendTickCooldown = 0, defendersFractionOfAllUnits = 0, useBraves = 0, belowThisPopStartUsingBraves = 0, usePreachers = 0}
 AIDefend.__index = AIDefend
 
-function AIDefend:new (o, tribe, shamanDefaultDefX, shamanDefaultDefZ, defendTickCooldown, defendersFractionOfAllUnits, useBraves, belowThisPopStartUsingBraves)
+function AIDefend:new (o, tribe, shamanDefaultDefX, shamanDefaultDefZ, defendTickCooldown, defendersFractionOfAllUnits, useBraves, belowThisPopStartUsingBraves, usePreachers)
     local o = o or {}
     setmetatable(o, AIDefend)
     o.tribe = tribe
@@ -22,6 +22,7 @@ function AIDefend:new (o, tribe, shamanDefaultDefX, shamanDefaultDefZ, defendTic
     o.defendersFractionOfAllUnits = defendersFractionOfAllUnits
     o.useBraves = useBraves
     o.belowThisPopStartUsingBraves = belowThisPopStartUsingBraves
+    o.usePreachers = usePreachers
 
     o.defended = 0
     o.defendTick = 0
@@ -36,23 +37,15 @@ function AIDefend:defendBase(enemyTribe, defendMarkerX, defendMarkerZ, marker, r
 
     --If there are enemies spotted around a marker check if you already have units there, if you have enough units then move Shaman only (otherwise she runs back to her tower) otherwise move Shaman and a force
     if (enemyCount > 0) then
-        if (self.useBraves == 1 and _gsi.Players[self.tribe].NumPeople < self.belowThisPopStartUsingBraves) then
-            if (self.defended == 0 and myCount > 12) then
-                self:sendDefendShaman(marker, defendMarkerX, defendMarkerZ)
-                self.defended = 1
-                self.defendTick = GetTurn() + self.defendTickCooldown
-            elseif (self.defended == 0 and myCount < 12) then
-                self:sendDefendShaman(marker, defendMarkerX, defendMarkerZ)
-                self:sendDefendForce(enemyTribe, defendMarkerX, defendMarkerZ, marker)
-                self.defended = 1
-                self.defendTick = GetTurn() + self.defendTickCooldown
-            end
-        elseif (self.useBraves == 0) then
-            if (self.defended == 0) then
-                self:sendDefendShaman(marker, defendMarkerX, defendMarkerZ)
-                self.defended = 1
-                self.defendTick = GetTurn() + self.defendTickCooldown
-            end
+        if (self.defended == 0 and myCount > 12) then
+            self:sendDefendShaman(marker, defendMarkerX, defendMarkerZ)
+            self.defended = 1
+           self.defendTick = GetTurn() + self.defendTickCooldown
+        elseif (self.defended == 0 and myCount < 12) then
+               self:sendDefendShaman(marker, defendMarkerX, defendMarkerZ)
+            self:sendDefendForce(enemyTribe, defendMarkerX, defendMarkerZ, marker)
+            self.defended = 1
+            self.defendTick = GetTurn() + self.defendTickCooldown
         end
     end
 end
@@ -98,11 +91,10 @@ end
 --Send Shaman to defend alone, attributes are changed here too since the Shaman always goes first
 function AIDefend:sendDefendShaman(marker, defendMarkerX, defendMarkerZ)
     WRITE_CP_ATTRIB(self.tribe, ATTR_AWAY_MEDICINE_MAN, 0)
-    WRITE_CP_ATTRIB(self.tribe, ATTR_AWAY_RELIGIOUS, 0)
     WRITE_CP_ATTRIB(self.tribe, ATTR_DONT_GROUP_AT_DT, 1)
     WRITE_CP_ATTRIB(self.tribe, ATTR_GROUP_OPTION, 2)
     WRITE_CP_ATTRIB(self.tribe, ATTR_BASE_UNDER_ATTACK_RETREAT, 0)
-    WRITE_CP_ATTRIB(self.tribe, ATTR_FIGHT_STOP_DISTANCE, 16)
+    WRITE_CP_ATTRIB(self.tribe, ATTR_FIGHT_STOP_DISTANCE, 4)
 
     MOVE_SHAMAN_TO_MARKER(self.tribe, marker)
     SHAMAN_DEFEND(self.tribe, defendMarkerX, defendMarkerZ, TRUE)
@@ -114,6 +106,17 @@ end
 
 --Send defence force
 function AIDefend:sendDefendForce(enemyTribe, defendMarkerX, defendMarkerZ, marker)
+    if (self.useBraves == 1 and self.belowThisPopStartUsingBraves > _gsi.Players[self.tribe].NumPeople) then
+        WRITE_CP_ATTRIB(self.tribe, ATTR_AWAY_BRAVE, 80)
+    end
+    if (self.usePreachers == 1) then
+        WRITE_CP_ATTRIB(self.tribe, ATTR_AWAY_RELIGIOUS, 35)
+    end
+    if (self.usePreachers == 1 and self.useBraves == 1 and self.belowThisPopStartUsingBraves > _gsi.Players[self.tribe].NumPeople) then
+        WRITE_CP_ATTRIB(self.tribe, ATTR_AWAY_BRAVE, 65)
+        WRITE_CP_ATTRIB(self.tribe, ATTR_AWAY_RELIGIOUS, 35)
+    end
+
     local defendAmount = _gsi.Players[self.tribe].NumPeople//self.defendersFractionOfAllUnits
     ATTACK(self.tribe, enemyTribe, defendAmount, ATTACK_MARKER, marker, 900, 0, 0, 0, ATTACK_NORMAL, 0, -1, -1, -1)
 end

@@ -30,6 +30,15 @@ function AIShaman:new (o, tribe, blastAllowed, lightningAllowed, ghostsAllowed, 
     o.manaCostGhostArmy = SPELL_COST(M_SPELL_GHOST_ARMY)
     o.manaCostInsectPlague = SPELL_COST(M_SPELL_INSECT_PLAGUE)
     o.manaCostLightning = SPELL_COST(M_SPELL_LIGHTNING_BOLT)
+
+    o.smartCastsBlast = 0
+    o.smartCastsGhosts = 0
+    o.smartCastsLightning = 0
+
+    o.maxSmartCastsBlast = 4
+    o.maxSmartCastsGhosts = 4
+    o.maxSmartCastsLightning = 4
+
     return o
 end
 
@@ -99,7 +108,7 @@ function AIShaman:handleShamanCombat ()
                         end
                         
                         --First try to lock down the enemy shaman with ghost army if allowed
-                        if (get_world_dist_xyz(shaman.Pos.D3, t.Pos.D3) < 4092 + shaman.Pos.D3.Ypos*3 and (t.Model == M_PERSON_MEDICINE_MAN) and self.ghostsAllowed == 1 and MANA(self.tribe) > self.manaCostGhostArmy and self.spellDelay == 0 and self.ghostsSpecialDelay == 0) then  
+                        if (get_world_dist_xyz(shaman.Pos.D3, t.Pos.D3) < 4092 + shaman.Pos.D3.Ypos*3 and (t.Model == M_PERSON_MEDICINE_MAN) and self.ghostsAllowed == 1 and MANA(self.tribe) > self.manaCostGhostArmy and self.spellDelay == 0 and self.ghostsSpecialDelay == 0 and self.smartCastsGhosts < self.maxSmartCastsGhosts) then  
                             if (is_thing_on_ground(shaman) == 1) then
                                 createThing(T_SPELL, M_SPELL_GHOST_ARMY, shaman.Owner, t.Pos.D3, false, false)
                                     self.spellDelay = 24
@@ -108,7 +117,7 @@ function AIShaman:handleShamanCombat ()
               		                return false
                                 end    
                         --If I'm allowed and can cast lightning cast it
-                        elseif (get_world_dist_xyz(shaman.Pos.D3, t.Pos.D3) < 6000 + shaman.Pos.D3.Ypos*3 and (t.Model == M_PERSON_MEDICINE_MAN or t.Model == M_PERSON_RELIGIOUS) and self.lightningAllowed == 1 and MANA(self.tribe) > self.manaCostLightning and self.spellDelay == 0) then
+                        elseif (get_world_dist_xyz(shaman.Pos.D3, t.Pos.D3) < 6000 + shaman.Pos.D3.Ypos*3 and (t.Model == M_PERSON_MEDICINE_MAN or t.Model == M_PERSON_RELIGIOUS) and self.lightningAllowed == 1 and MANA(self.tribe) > self.manaCostLightning and self.spellDelay == 0 and self.smartCastsLightning < self.maxSmartCastsLightning) then
                             if (is_thing_on_ground(shaman) == 1) then
                                 createThing(T_SPELL, M_SPELL_LIGHTNING_BOLT, shaman.Owner, t.Pos.D3, false, false)
               		                self.spellDelay = 60
@@ -116,7 +125,7 @@ function AIShaman:handleShamanCombat ()
               		                return false
                                 end 
                         --If I'm allowed and can cast blast cast it
-                        elseif (get_world_dist_xyz(shaman.Pos.D3, t.Pos.D3) < 3092 + shaman.Pos.D3.Ypos*3 and (t.Model == M_PERSON_MEDICINE_MAN or t.Model == M_PERSON_RELIGIOUS) and self.blastAllowed == 1 and MANA(self.tribe) > self.manaCostBlast and self.spellDelay == 0) then
+                        elseif (get_world_dist_xyz(shaman.Pos.D3, t.Pos.D3) < 3092 + shaman.Pos.D3.Ypos*3 and (t.Model == M_PERSON_MEDICINE_MAN or t.Model == M_PERSON_RELIGIOUS) and self.blastAllowed == 1 and MANA(self.tribe) > self.manaCostBlast and self.spellDelay == 0  and self.smartCastsBlast < self.maxSmartCastsBlast) then
                             if (is_thing_on_ground(shaman) == 1) then
                                 createThing(T_SPELL, M_SPELL_BLAST, shaman.Owner, t.Pos.D3, false, false)
               		                self.spellDelay = 24
@@ -146,25 +155,47 @@ function AIShaman:checkSpellDelay()
         end
 
         --Old code to give AI an artificial cooldown on spells instead of using actual mana, keeping it here just in case the AI using mana messes with their attack times
-        --[[--Can increase charge rate if more followers in future?
+        --Can increase charge rate if more followers in future?
         --Half time at 80+ followers
-        --Recharge smart casts of Blast (8 seconds)
-        if (everyPow(96, 1)) then
-            if (self.smartCastsBlast ~= 0) then
-                self.smartCastsBlast = self.smartCastsBlast -1
+        --Recharge smart casts of Blast (6 seconds)
+        if (_gsi.Players[self.tribe].NumPeople < 80) then
+            if (everyPow(72, 1)) then
+                if (self.smartCastsBlast ~= 0) then
+                    self.smartCastsBlast = self.smartCastsBlast -1
+                end
             end
-        end
-        --Recharge smart casts of Lightning (30 seconds)
-        if (everyPow(360, 1)) then
-            if (self.smartCastsLightning ~= 0) then
-                self.smartCastsLightning = self.smartCastsLightning -1  
+            --Recharge smart casts of Lightning (30 seconds)
+            if (everyPow(360, 1)) then
+                if (self.smartCastsLightning ~= 0) then
+                    self.smartCastsLightning = self.smartCastsLightning -1  
+                end
             end
-        end
 
-        --Recharge smart casts of Ghost Army (2 seconds)
-        if (everyPow(24, 1)) then
-            if (self.smartCastsGhosts ~= 0) then
-                self.smartCastsGhosts = self.smartCastsGhosts -1
+            --Recharge smart casts of Ghost Army (2 seconds)
+            if (everyPow(24, 1)) then
+                if (self.smartCastsGhosts ~= 0) then
+                    self.smartCastsGhosts = self.smartCastsGhosts -1
+                end
             end
-        end--]]
+        else
+            --Recharge smart casts of Blast (3 seconds)
+            if (everyPow(36, 1)) then
+                if (self.smartCastsBlast ~= 0) then
+                    self.smartCastsBlast = self.smartCastsBlast -1
+                end
+            end
+            --Recharge smart casts of Lightning (15 seconds)
+            if (everyPow(180, 1)) then
+                if (self.smartCastsLightning ~= 0) then
+                    self.smartCastsLightning = self.smartCastsLightning -1  
+                end
+            end
+
+            --Recharge smart casts of Ghost Army (1 seconds)
+            if (everyPow(12, 1)) then
+                if (self.smartCastsGhosts ~= 0) then
+                    self.smartCastsGhosts = self.smartCastsGhosts -1
+                end
+            end
+        end
 end
