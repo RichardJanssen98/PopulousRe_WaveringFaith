@@ -63,6 +63,23 @@ function AIShaman:handleShamanCombat ()
                                     return false
                             end
                         end
+                        
+                        --Check if I can cast Swarm, if not then cast Blast if someone is fighting me
+                        --Insect Plague will only be cast if the tribe has 4 times the cost, this due to Lightning Bolt being more important and it costs twice as much as Insect Plague. 
+                        --Thus the Shaman will only cast Insect Plague if they would be able to cast two Lightning Bolts.
+                        if (shaman.State == S_PERSON_FIGHT_PERSON_2 and self.insectPlagueAllowed == 1 and MANA(self.tribe) > (self.manaCostInsectPlague * 4) and self.spellDelay == 0 and self.insectPlagueSpecialDelay == 0) then
+                            createThing(T_SPELL, M_SPELL_INSECT_PLAGUE, shaman.Owner, shaman.Pos.D3, false, false)
+                                    self.spellDelay = 24
+                                    self.insectPlagueSpecialDelay = 240
+                                    GIVE_MANA_TO_PLAYER(self.tribe, self.manaCostInsectPlague * -1)
+                                    return false
+                        elseif (shaman.State == S_PERSON_FIGHT_PERSON_2 and self.blastAllowed == 1 and MANA(self.tribe) > self.manaCostBlast and self.spellDelay == 0  and self.smartCastsBlast < self.maxSmartCastsBlast) then
+                            createThing(T_SPELL, M_SPELL_BLAST, shaman.Owner, shaman.Pos.D3, false, false)
+              		                self.spellDelay = 24
+                                    self.smartCastsBlast = self.smartCastsBlast + 1
+                                    GIVE_MANA_TO_PLAYER(self.tribe, self.manaCostBlast * -1)
+              		                return false
+                        end
 
                         --Dodge lightning if needed, otherwise only try to dodge blast
                         if (self.dodgeLightning == 1) then
@@ -113,6 +130,7 @@ function AIShaman:handleShamanCombat ()
                                 createThing(T_SPELL, M_SPELL_GHOST_ARMY, shaman.Owner, t.Pos.D3, false, false)
                                     self.spellDelay = 24
               		                self.ghostsSpecialDelay = 144
+                                    self.smartCastsGhosts = self.smartCastsGhosts + 1
                                     GIVE_MANA_TO_PLAYER(self.tribe, self.manaCostGhostArmy * -1)
               		                return false
                                 end    
@@ -121,6 +139,7 @@ function AIShaman:handleShamanCombat ()
                             if (is_thing_on_ground(shaman) == 1) then
                                 createThing(T_SPELL, M_SPELL_LIGHTNING_BOLT, shaman.Owner, t.Pos.D3, false, false)
               		                self.spellDelay = 60
+                                    self.smartCastsLightning = self.smartCastsLightning + 1
                                     GIVE_MANA_TO_PLAYER(self.tribe, self.manaCostLightning * -1)
               		                return false
                                 end 
@@ -129,6 +148,7 @@ function AIShaman:handleShamanCombat ()
                             if (is_thing_on_ground(shaman) == 1) then
                                 createThing(T_SPELL, M_SPELL_BLAST, shaman.Owner, t.Pos.D3, false, false)
               		                self.spellDelay = 24
+                                    self.smartCastsBlast = self.smartCastsBlast + 1
                                     GIVE_MANA_TO_PLAYER(self.tribe, self.manaCostBlast * -1)
               		                return false
                                 end

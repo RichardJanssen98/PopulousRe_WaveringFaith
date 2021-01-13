@@ -36,6 +36,8 @@ shaman_tick_green = GetTurn() + (2048 + G_RANDOM(2048))
 shaman_tick_cyan = GetTurn() + (2048 + G_RANDOM(2048))
 shaman_tick_black = GetTurn() + (2048 + G_RANDOM(2048))
 
+heightCache = {GET_HEIGHT_AT_POS(38), GET_HEIGHT_AT_POS(39), GET_HEIGHT_AT_POS(40), GET_HEIGHT_AT_POS(41)}
+
 --Ally Red and Blue since the World Editor alliances don't seem to carry over to the game.
 set_players_allied(TRIBE_BLUE, TRIBE_RED)
 set_players_allied(TRIBE_RED, TRIBE_BLUE)
@@ -117,8 +119,8 @@ WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_PREF_RELIGIOUS_TRAINS, 1)
 WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_PREF_RELIGIOUS_PEOPLE, 35)
 WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_EMPTY_AT_WAYPOINT, 1)
 WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_PREF_BOAT_HUTS, 1)
-WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_PREF_BOAT_DRIVERS, 6)
-WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_PEOPLE_PER_BOAT, 7)
+WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_PREF_BOAT_DRIVERS, 8)
+WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_PEOPLE_PER_BOAT, 6)
 STATE_SET(TRIBE_CYAN, TRUE, CP_AT_TYPE_BUILD_VEHICLE)
 
 SHAMAN_DEFEND(TRIBE_CYAN, 164, 152, TRUE)
@@ -130,8 +132,8 @@ WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_HOUSE_PERCENTAGE, 50)
 WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_MAX_BUILDINGS_ON_GO, 4)
 WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_PREF_RELIGIOUS_TRAINS, 1)
 WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_PREF_RELIGIOUS_PEOPLE, 35)
-
-SET_MARKER_ENTRY(TRIBE_BLACK, 0, 0, 1, 6+G_RANDOM(7), 0, 0, 1)
+WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_PREF_BOAT_DRIVERS, 6)
+WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_PEOPLE_PER_BOAT, 7)
 
 SHAMAN_DEFEND(TRIBE_BLACK, 34, 10, TRUE)
 SET_DRUM_TOWER_POS(TRIBE_BLACK, 34, 10)
@@ -160,6 +162,8 @@ for aiNumber = 1, 3 do
     WRITE_CP_ATTRIB(ai_Tribes[aiNumber], ATTR_ENEMY_SPY_MAX_STAND, 128)
     WRITE_CP_ATTRIB(ai_Tribes[aiNumber], ATTR_DONT_USE_BOATS, 0)
     STATE_SET(ai_Tribes[aiNumber], TRUE, CP_AT_TYPE_PREACH)
+    STATE_SET(ai_Tribes[aiNumber], TRUE, CP_AT_TYPE_FETCH_FAR_VEHICLE)
+    STATE_SET(ai_Tribes[aiNumber], TRUE, CP_AT_TYPE_FETCH_LOST_VEHICLE)
     STATE_SET(ai_Tribes[aiNumber], TRUE, CP_AT_TYPE_DEFEND)
     STATE_SET(ai_Tribes[aiNumber], TRUE, CP_AT_TYPE_DEFEND_BASE)
     STATE_SET(ai_Tribes[aiNumber], TRUE, CP_AT_TYPE_BUILD_OUTER_DEFENCES)
@@ -220,12 +224,233 @@ function OnTurn()
                 AIDefendBlack:defendBase(enemyTribesBlack[enemyNumber], 30, 30, 3, 6)
                 AIDefendBlack:defendBase(enemyTribesBlack[enemyNumber], 40, 18, 4, 6)
                 AIDefendBlack:defendBase(enemyTribesBlack[enemyNumber], 28, 6, 5, 6)
-                AIDefendBlack:defendBase(enemyTribesBlack[enemyNumber], 18, 236, 6, 6)
+                AIDefendBlack:defendBase(enemyTribesBlack[enemyNumber], 18, 238, 6, 5)
                 AIDefendBlack:defendBase(enemyTribesBlack[enemyNumber], 38, 234, 7, 6)
             end
         end
 
+        if (everyPow(1440, 1)) then
+            local h1 = GET_HEIGHT_AT_POS(38)
+            local h2 = GET_HEIGHT_AT_POS(39)
+            local h3 = GET_HEIGHT_AT_POS(40)
+            local h4 = GET_HEIGHT_AT_POS(41)
+
+            enemyToAttackBridge = enemyTribesCyan[G_RANDOM(#enemyTribesCyan)+1]
+
+            --Make path to Stone Head as Cyan 
+            if (MANA(TRIBE_CYAN) >= SPELL_COST(M_SPELL_LAND_BRIDGE)) then
+                if (_gsi.Players[enemyToAttackBridge].NumPeople > 0) then
+                    if (h1 == heightCache[1]) then
+                        WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_MEDICINE_MAN, 100)
+                        ATTACK(TRIBE_CYAN, enemyToAttackBridge, 0, ATTACK_PERSON, -1, 0, M_SPELL_LAND_BRIDGE, M_SPELL_NONE, M_SPELL_NONE, ATTACK_NORMAL, 0, 24, 25, -1)
+                    elseif (h2 == heightCache[2]) then
+                        WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_MEDICINE_MAN, 100)
+                        ATTACK(TRIBE_CYAN, enemyToAttackBridge, 0, ATTACK_PERSON, -1, 0, M_SPELL_LAND_BRIDGE, M_SPELL_NONE, M_SPELL_NONE, ATTACK_NORMAL, 0, 26, 27, -1)
+                    elseif (h3 == heightCache[3]) then
+                        WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_MEDICINE_MAN, 100)
+                        ATTACK(TRIBE_CYAN, enemyToAttackBridge, 0, ATTACK_PERSON, -1, 0, M_SPELL_LAND_BRIDGE, M_SPELL_NONE, M_SPELL_NONE, ATTACK_NORMAL, 0, 28, 29, -1)
+                    end
+                end
+            end
+
+            --Make path to Blue as Black
+            if (MANA(TRIBE_BLACK) >= SPELL_COST(M_SPELL_LAND_BRIDGE)) then
+                if (_gsi.Players[enemyToAttackBridge].NumPeople > 0) then
+                    if (h4 == heightCache[4]) then
+                        WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_AWAY_MEDICINE_MAN, 100)
+                        ATTACK(TRIBE_BLACK, enemyToAttackBridge, 0, ATTACK_PERSON, -1, 0, M_SPELL_LAND_BRIDGE, M_SPELL_NONE, M_SPELL_NONE, ATTACK_NORMAL, 0, 35, 36, -1)
+                    end
+                end
+            end
+
+            --Let Green or Cyan pray at the stone head, bigger chance for Green.
+            local CyanOrGreen = G_RANDOM(3)+1 
+            if (CyanOrGreen == 1) then
+                if (NAV_CHECK(TRIBE_CYAN, enemyToAttackBridge, ATTACK_MARKER, 37, 0)) then
+                    PRAY_AT_HEAD(TRIBE_CYAN, 5, 37)
+                end
+            elseif (CyanOrGreen >= 2) then
+                if (NAV_CHECK(TRIBE_GREEN, enemyToAttackBridge, ATTACK_MARKER, 37, 0)) then
+                    PRAY_AT_HEAD(TRIBE_GREEN, 5, 37)
+                end
+            end
+        end
         
+        --Cyan attacks
+        --Decide who to attack
+        if (GetTurn() > shaman_tick_cyan) then
+            enemyToAttackCyan = enemyTribesCyan[G_RANDOM(#enemyTribesCyan)+1]
+
+            attackMethodCyan = G_RANDOM(2) + 1
+        end
+
+        --Attack on foot, for everyone, but most likely Red
+        if (attackMethodCyan == 1) then
+            if (GetTurn() > shaman_tick_cyan and PLAYERS_BUILDING_OF_TYPE(enemyToAttackCyan, M_BUILDING_TEPEE) > 0) then
+                if (NAV_CHECK(TRIBE_CYAN, enemyToAttackCyan, ATTACK_BUILDING, -1, 0)) then
+                    if (_gsi.Players[TRIBE_CYAN].NumPeople > 60 and cyanDefended == 0 and MANA(TRIBE_CYAN) > 50000) then
+                        WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_MEDICINE_MAN, 100)
+                        WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_BRAVE, 60)
+                        WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_RELIGIOUS, 40)
+                        ATTACK(TRIBE_CYAN, enemyToAttackCyan, 15+G_RANDOM(20), ATTACK_BUILDING, -1, 600+G_RANDOM(400), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, -1, -1, -1)
+                        shaman_tick_cyan = GetTurn() + 2048 + G_RANDOM(2048)
+                    elseif (_gsi.Players[TRIBE_CYAN].NumPeople > 40 and cyanDefended == 0 and MANA(TRIBE_CYAN) > 50000) then
+                        WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_MEDICINE_MAN, 100)
+                        WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_BRAVE, 60)
+                        WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_RELIGIOUS, 40)
+                        ATTACK(TRIBE_CYAN, enemyToAttackCyan, 10+G_RANDOM(11), ATTACK_BUILDING, -1, 250+G_RANDOM(500), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, -1, -1, -1)
+                        shaman_tick_cyan = GetTurn() + 2048 + G_RANDOM(2048)
+                    end
+                end
+            end
+        --Attack by boat
+        elseif (attackMethodCyan == 2) then
+            --Don't bring back boats if it's Black to give them the opportunity to attack others too.
+            local bringBackBoats = 1
+            local markerToLand = 0
+
+            if (enemyToAttackCyan == TRIBE_BLACK) then
+                bringBackBoats = 0
+            end
+
+            --Set landing point based on enemy
+            if (enemyToAttackCyan == TRIBE_BLUE) then
+                local rnd = G_RANDOM(2) + 1
+                if (rnd == 1) then
+                    markerToLand = 31
+                else
+                    markerToLand = 32
+                end
+            end
+            if (enemyToAttackCyan == TRIBE_RED) then
+                local rnd = G_RANDOM(2) + 1
+                if (rnd == 1) then
+                    markerToLand = 33
+                else
+                    markerToLand = 34
+                end
+            end
+            if (enemyToAttackCyan == TRIBE_BLACK) then
+                markerToLand = 30
+            end
+
+            --Attack with boats and bring them back if the enemy is not Black
+            if (GetTurn() > shaman_tick_cyan and _gsi.Players[TRIBE_CYAN].NumPeople > 60 and GET_NUM_OF_AVAILABLE_BOATS(TRIBE_CYAN) > 3 and MANA(TRIBE_CYAN) > 50000 and cyanDefended == 0) then
+                WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_MEDICINE_MAN, 100)
+                WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_BRAVE, 60)
+                WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_RELIGIOUS, 40)
+                ATTACK(TRIBE_CYAN, enemyToAttackCyan, 12+G_RANDOM(20), ATTACK_BUILDING, -1, 600+G_RANDOM(400), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_BY_BOAT, bringBackBoats, markerToLand, -1, -1)
+                shaman_tick_cyan = GetTurn() + 2048 + G_RANDOM(2048)
+            elseif (GetTurn() > shaman_tick_cyan and _gsi.Players[TRIBE_CYAN].NumPeople > 40 and GET_NUM_OF_AVAILABLE_BOATS(TRIBE_CYAN) > 5 and MANA(TRIBE_CYAN) > 50000 and cyanDefended == 0) then
+                WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_MEDICINE_MAN, 100)
+                WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_BRAVE, 60)
+                WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_RELIGIOUS, 40)
+                ATTACK(TRIBE_CYAN, enemyToAttackCyan, 8+G_RANDOM(11), ATTACK_BUILDING, -1, 250+G_RANDOM(400), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_BY_BOAT, bringBackBoats, markerToLand, -1, -1)
+                shaman_tick_cyan = GetTurn() + 2048 + G_RANDOM(2048)
+            end
+        end
+
+        --Green attacks
+        --Decide who to attack
+        if (GetTurn() > shaman_tick_green) then
+            enemyToAttackGreen = enemyTribesGreen[G_RANDOM(#enemyTribesGreen)+1]
+        end
+
+        if (GetTurn() > shaman_tick_green and PLAYERS_BUILDING_OF_TYPE(enemyToAttackGreen, M_BUILDING_TEPEE) > 0) then
+            if (NAV_CHECK(TRIBE_GREEN, enemyToAttackGreen, ATTACK_BUILDING, -1, 0)) then
+                if (_gsi.Players[TRIBE_GREEN].NumPeople > 60 and MANA(TRIBE_GREEN) > 50000 and greenDefended == 0) then
+                    WRITE_CP_ATTRIB(TRIBE_GREEN, ATTR_AWAY_MEDICINE_MAN, 100)
+                    WRITE_CP_ATTRIB(TRIBE_GREEN, ATTR_AWAY_BRAVE, 60)
+                    WRITE_CP_ATTRIB(TRIBE_GREEN, ATTR_AWAY_RELIGIOUS, 40)
+                    ATTACK(TRIBE_GREEN, enemyToAttackGreen, 10 + G_RANDOM(18), ATTACK_BUILDING, -1, 400+G_RANDOM(400), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, -1, -1, -1)
+                    shaman_tick_green = GetTurn() + 2048 + G_RANDOM(2048)
+                elseif (_gsi.Players[TRIBE_GREEN].NumPeople > 40 and MANA(TRIBE_GREEN) > 50000 and greenDefended == 0) then
+                    WRITE_CP_ATTRIB(TRIBE_GREEN, ATTR_AWAY_MEDICINE_MAN, 100)
+                    WRITE_CP_ATTRIB(TRIBE_GREEN, ATTR_AWAY_BRAVE, 60)
+                    WRITE_CP_ATTRIB(TRIBE_GREEN, ATTR_AWAY_RELIGIOUS, 40)
+                    ATTACK(TRIBE_GREEN, enemyToAttackGreen, 8 + G_RANDOM(14), ATTACK_BUILDING, -1, 250+G_RANDOM(400), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, -1, -1, -1)
+                    shaman_tick_green = GetTurn() + 2048 + G_RANDOM(2048)
+                end
+            end
+        end
+
+        --Black attacks
+        --Decide who to Attack
+        if (GetTurn() > shaman_tick_black) then
+            enemyToAttackBlack = enemyTribesBlack[G_RANDOM(#enemyTribesBlack)+1]
+
+            attackMethodBlack = G_RANDOM(2) + 1
+        end
+
+        if (attackMethodBlack == 1) then
+            if (GetTurn() > shaman_tick_black and PLAYERS_BUILDING_OF_TYPE(enemyToAttackBlack, M_BUILDING_TEPEE) > 0) then
+                if (NAV_CHECK(TRIBE_BLACK, enemyToAttackBlack, ATTACK_BUILDING, -1, 0)) then
+                    if (_gsi.Players[TRIBE_BLACK].NumPeople > 60 and MANA(TRIBE_BLACK) > 90000 and blackDefended == 0) then
+                        WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_AWAY_MEDICINE_MAN, 100)
+                        WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_AWAY_BRAVE, 60)
+                        WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_AWAY_RELIGIOUS, 40)
+                        ATTACK(TRIBE_BLACK, enemyToAttackBlack, 15 + G_RANDOM(20), ATTACK_BUILDING, -1, 500+G_RANDOM(500), M_SPELL_INSECT_PLAGUE, M_SPELL_INSECT_PLAGUE, M_SPELL_BLAST, ATTACK_NORMAL, 0, -1, -1, -1)
+                        shaman_tick_black = GetTurn() + 2048 + G_RANDOM(2048)
+                    elseif (_gsi.Players[TRIBE_BLACK].NumPeople > 40 and MANA(TRIBE_BLACK) > 60000 and blackDefended == 0) then
+                        WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_AWAY_MEDICINE_MAN, 100)
+                        WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_AWAY_BRAVE, 60)
+                        WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_AWAY_RELIGIOUS, 40)
+                        ATTACK(TRIBE_BLACK, enemyToAttackBlack, 10 + G_RANDOM(17), ATTACK_BUILDING, -1, 500+G_RANDOM(500), M_SPELL_INSECT_PLAGUE, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, -1, -1, -1)
+                        shaman_tick_black = GetTurn() + 2048 + G_RANDOM(2048)
+                    end
+                end
+            end
+        elseif (attackMethodBlack == 2 and GET_NUM_OF_AVAILABLE_BOATS(TRIBE_BLACK) > 3) then
+            local markerToLand = 0
+
+            --Set landing point based on enemy
+            if (enemyToAttackBlack == TRIBE_BLUE) then
+                local rnd = G_RANDOM(2) + 1
+                if (rnd == 1) then
+                    markerToLand = 31
+                else
+                    markerToLand = 32
+                end
+            end
+            if (enemyToAttackBlack == TRIBE_RED) then
+                local rnd = G_RANDOM(2) + 1
+                if (rnd == 1) then
+                    markerToLand = 33
+                else
+                    markerToLand = 34
+                end
+            end
+            if (enemyToAttackBlack == TRIBE_CYAN) then
+                local rnd = G_RANDOM(2) + 1
+                if (rnd == 1) then
+                    markerToLand = 44
+                else
+                    markerToLand = 45
+                end
+            end
+            if (enemyToAttackBlack == TRIBE_GREEN) then
+                local rnd = G_RANDOM(2) + 1
+                if (rnd == 1) then
+                    markerToLand = 42
+                else
+                    markerToLand = 43
+                end
+            end
+
+            if (GetTurn() > shaman_tick_black and _gsi.Players[TRIBE_BLACK].NumPeople > 60 and GET_NUM_OF_AVAILABLE_BOATS(TRIBE_BLACK) > 3 and MANA(TRIBE_BLACK) > 90000 and blackDefended == 0) then
+                WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_AWAY_MEDICINE_MAN, 100)
+                WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_AWAY_BRAVE, 60)
+                WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_AWAY_RELIGIOUS, 40)
+                ATTACK(TRIBE_BLACK, enemyToAttackBlack, 12+G_RANDOM(20), ATTACK_BUILDING, -1, 600+G_RANDOM(400), M_SPELL_INSECT_PLAGUE, M_SPELL_INSECT_PLAGUE, M_SPELL_BLAST, ATTACK_BY_BOAT, 1, markerToLand, -1, -1)
+                shaman_tick_black = GetTurn() + 2048 + G_RANDOM(2048)
+            elseif (GetTurn() > shaman_tick_black and _gsi.Players[TRIBE_BLACK].NumPeople > 40 and GET_NUM_OF_AVAILABLE_BOATS(TRIBE_BLACK) > 5 and MANA(TRIBE_BLACK) > 60000 and blackDefended == 0) then
+                WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_AWAY_MEDICINE_MAN, 100)
+                WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_AWAY_BRAVE, 60)
+                WRITE_CP_ATTRIB(TRIBE_BLACK, ATTR_AWAY_RELIGIOUS, 40)
+                ATTACK(TRIBE_BLACK, enemyToAttackBlack, 8+G_RANDOM(11), ATTACK_BUILDING, -1, 250+G_RANDOM(400), M_SPELL_INSECT_PLAGUE, M_SPELL_INSECT_PLAGUE, M_SPELL_BLAST, ATTACK_BY_BOAT, 1, markerToLand, -1, -1)
+                shaman_tick_black = GetTurn() + 2048 + G_RANDOM(2048)
+            end
+        end
 
         AIShamanGreen:handleShamanCombat()
         AIShamanCyan:handleShamanCombat()
@@ -233,7 +458,6 @@ function OnTurn()
 
         --Fill up empty patrols
         if (every2Pow(9)) then
-            MARKER_ENTRIES(TRIBE_BLACK, 0, -1, -1, -1)
             PREACH_AT_MARKER(TRIBE_BLACK, 2)
             PREACH_AT_MARKER(TRIBE_BLACK, 3)
             PREACH_AT_MARKER(TRIBE_BLACK, 4)
