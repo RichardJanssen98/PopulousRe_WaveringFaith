@@ -9,10 +9,10 @@ import(Module_Commands)
 include("UtilPThings.lua")
 include("UtilRefs.lua")
 
-AIShaman = {tribe = 0, blastAllowed = 0, lightningAllowed = 0, ghostsAllowed = 0, insectPlagueAllowed = 0, spellDelay = 0, ghostsSpecialDelay = 0, insectPlagueSpecialDelay = 0, dodgeLightning = 0}
+AIShaman = {tribe = 0, blastAllowed = 0, lightningAllowed = 0, ghostsAllowed = 0, insectPlagueAllowed = 0, spellDelay = 0, ghostsSpecialDelay = 0, insectPlagueSpecialDelay = 0, dodgeLightning = 0, allies = 0}
 AIShaman.__index = AIShaman
 
-function AIShaman:new (o, tribe, blastAllowed, lightningAllowed, ghostsAllowed, insectPlagueAllowed, dodgeLightning)
+function AIShaman:new (o, tribe, blastAllowed, lightningAllowed, ghostsAllowed, insectPlagueAllowed, dodgeLightning, allies)
     local o = o or {}
     setmetatable(o, AIShaman)
     o.tribe = tribe
@@ -25,6 +25,8 @@ function AIShaman:new (o, tribe, blastAllowed, lightningAllowed, ghostsAllowed, 
     o.spellDelay = 0
     o.ghostsSpecialDelay = 0
     o.insectPlagueSpecialDelay = 0
+
+    o.allies = allies
 
     o.manaCostBlast = SPELL_COST(M_SPELL_BLAST)
     o.manaCostGhostArmy = SPELL_COST(M_SPELL_GHOST_ARMY)
@@ -47,12 +49,24 @@ function AIShaman:handleShamanCombat ()
         local wasInFight = 0 --Use this to stop moving very far
         
         local enemyIWasFighting = 0
+        isAlly = false
 
         if (shaman ~= nil) then
             local shamanPos = MAP_XZ_2_WORLD_XYZ(shaman.Pos.D3.Xpos, shaman.Pos.D3.Zpos)
 
             ProcessGlobalTypeList(T_PERSON, function(t)
-                   if (t.Owner ~= self.tribe and t.Model == M_PERSON_MEDICINE_MAN) then 
+                   --Check if the person is one of my allies
+                   if (self.allies ~= 0) then
+                       for _,v in pairs(self.allies) do
+                            if v == t.Owner then
+                                isAlly = true
+                                log("AmAlly")
+                                break
+                            end
+                       end
+                   end
+
+                   if (t.Owner ~= self.tribe and t.Model == M_PERSON_MEDICINE_MAN and isAlly == false) then 
                         --Destroy ghost armies near me with swarm
                         if (get_world_dist_xyz(shaman.Pos.D3, t.Pos.D3) < 2400 + shaman.Pos.D3.Ypos*3 and t.Flags2 & TF2_THING_IS_A_GHOST_PERSON ~= 0 and self.insectPlagueAllowed == 1 and MANA(self.tribe) > self.manaCostInsectPlague and self.spellDelay == 0 and self.insectPlagueSpecialDelay == 0) then
                             if(is_thing_on_ground(shaman) == 1) then

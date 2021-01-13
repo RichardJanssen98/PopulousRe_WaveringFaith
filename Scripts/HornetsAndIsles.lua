@@ -24,9 +24,12 @@ greenDefended = 0
 cyanDefended = 0
 blackDefended = 0
 
-AIShamanGreen = AIShaman:new(nil, TRIBE_GREEN, 1, 0, 0, 0, 0)
-AIShamanCyan = AIShaman:new(nil, TRIBE_CYAN, 1, 0, 0, 0, 0)
-AIShamanBlack = AIShaman:new(nil, TRIBE_BLACK, 1, 0, 0, 1, 0)
+alliesGreen = {TRIBE_CYAN}
+alliesCyan = {TRIBE_GREEN}
+
+AIShamanGreen = AIShaman:new(nil, TRIBE_GREEN, 1, 0, 0, 0, 0, alliesGreen)
+AIShamanCyan = AIShaman:new(nil, TRIBE_CYAN, 1, 0, 0, 0, 0, alliesCyan)
+AIShamanBlack = AIShaman:new(nil, TRIBE_BLACK, 1, 0, 0, 1, 0, 0)
 
 AIDefendGreen = AIDefend:new(nil, TRIBE_GREEN, 226, 140, defendTimerUntilNewDefend, 3, 1, 500, 1)
 AIDefendCyan = AIDefend:new(nil, TRIBE_CYAN, 164, 152, defendTimerUntilNewDefend, 3, 1, 500, 1)
@@ -147,7 +150,7 @@ for aiNumber = 1, 3 do
     SET_SPELL_ENTRY(ai_Tribes[aiNumber], 0, M_SPELL_BLAST, SPELL_COST(M_SPELL_BLAST), 64, 1, 0)
     SET_SPELL_ENTRY(ai_Tribes[aiNumber], 1, M_SPELL_BLAST, SPELL_COST(M_SPELL_BLAST), 64, 1, 1)
 
-    SET_DEFENCE_RADIUS(ai_Tribes[aiNumber], 8)
+    SET_DEFENCE_RADIUS(ai_Tribes[aiNumber], 4)
 
     WRITE_CP_ATTRIB(ai_Tribes[aiNumber], ATTR_MAX_TRAIN_AT_ONCE, 6)
     WRITE_CP_ATTRIB(ai_Tribes[aiNumber], ATTR_MAX_ATTACKS, 999)
@@ -282,6 +285,12 @@ function OnTurn()
             enemyToAttackCyan = enemyTribesCyan[G_RANDOM(#enemyTribesCyan)+1]
 
             attackMethodCyan = G_RANDOM(2) + 1
+
+            if (I_HAVE_ONE_SHOT(TRIBE_CYAN, T_SPELL, M_SPELL_SWAMP) == 1) then
+                firstSpellCyan = M_SPELL_SWAMP
+            else
+                firstSpellCyan = M_SPELL_BLAST
+            end
         end
 
         --Attack on foot, for everyone, but most likely Red
@@ -292,13 +301,13 @@ function OnTurn()
                         WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_MEDICINE_MAN, 100)
                         WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_BRAVE, 60)
                         WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_RELIGIOUS, 40)
-                        ATTACK(TRIBE_CYAN, enemyToAttackCyan, 15+G_RANDOM(20), ATTACK_BUILDING, -1, 600+G_RANDOM(400), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, -1, -1, -1)
+                        ATTACK(TRIBE_CYAN, enemyToAttackCyan, 15+G_RANDOM(20), ATTACK_BUILDING, -1, 600+G_RANDOM(400), firstSpellCyan, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, -1, -1, -1)
                         shaman_tick_cyan = GetTurn() + 2048 + G_RANDOM(2048)
                     elseif (_gsi.Players[TRIBE_CYAN].NumPeople > 40 and cyanDefended == 0 and MANA(TRIBE_CYAN) > 50000) then
                         WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_MEDICINE_MAN, 100)
                         WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_BRAVE, 60)
                         WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_RELIGIOUS, 40)
-                        ATTACK(TRIBE_CYAN, enemyToAttackCyan, 10+G_RANDOM(11), ATTACK_BUILDING, -1, 250+G_RANDOM(500), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, -1, -1, -1)
+                        ATTACK(TRIBE_CYAN, enemyToAttackCyan, 10+G_RANDOM(11), ATTACK_BUILDING, -1, 250+G_RANDOM(500), firstSpellCyan, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, -1, -1, -1)
                         shaman_tick_cyan = GetTurn() + 2048 + G_RANDOM(2048)
                     end
                 end
@@ -339,13 +348,13 @@ function OnTurn()
                 WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_MEDICINE_MAN, 100)
                 WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_BRAVE, 60)
                 WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_RELIGIOUS, 40)
-                ATTACK(TRIBE_CYAN, enemyToAttackCyan, 12+G_RANDOM(20), ATTACK_BUILDING, -1, 600+G_RANDOM(400), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_BY_BOAT, bringBackBoats, markerToLand, -1, -1)
+                ATTACK(TRIBE_CYAN, enemyToAttackCyan, 12+G_RANDOM(20), ATTACK_BUILDING, -1, 600+G_RANDOM(400), firstSpellCyan, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_BY_BOAT, bringBackBoats, markerToLand, -1, -1)
                 shaman_tick_cyan = GetTurn() + 2048 + G_RANDOM(2048)
             elseif (GetTurn() > shaman_tick_cyan and _gsi.Players[TRIBE_CYAN].NumPeople > 40 and GET_NUM_OF_AVAILABLE_BOATS(TRIBE_CYAN) > 5 and MANA(TRIBE_CYAN) > 50000 and cyanDefended == 0) then
                 WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_MEDICINE_MAN, 100)
                 WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_BRAVE, 60)
                 WRITE_CP_ATTRIB(TRIBE_CYAN, ATTR_AWAY_RELIGIOUS, 40)
-                ATTACK(TRIBE_CYAN, enemyToAttackCyan, 8+G_RANDOM(11), ATTACK_BUILDING, -1, 250+G_RANDOM(400), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_BY_BOAT, bringBackBoats, markerToLand, -1, -1)
+                ATTACK(TRIBE_CYAN, enemyToAttackCyan, 8+G_RANDOM(11), ATTACK_BUILDING, -1, 250+G_RANDOM(400), firstSpellCyan, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_BY_BOAT, bringBackBoats, markerToLand, -1, -1)
                 shaman_tick_cyan = GetTurn() + 2048 + G_RANDOM(2048)
             end
         end
@@ -354,6 +363,12 @@ function OnTurn()
         --Decide who to attack
         if (GetTurn() > shaman_tick_green) then
             enemyToAttackGreen = enemyTribesGreen[G_RANDOM(#enemyTribesGreen)+1]
+
+            if (I_HAVE_ONE_SHOT(TRIBE_GREEN, T_SPELL, M_SPELL_SWAMP) == 1) then
+                firstSpellGreen = M_SPELL_SWAMP
+            else
+                firstSpellGreen = M_SPELL_BLAST
+            end
         end
 
         if (GetTurn() > shaman_tick_green and PLAYERS_BUILDING_OF_TYPE(enemyToAttackGreen, M_BUILDING_TEPEE) > 0) then
@@ -362,13 +377,13 @@ function OnTurn()
                     WRITE_CP_ATTRIB(TRIBE_GREEN, ATTR_AWAY_MEDICINE_MAN, 100)
                     WRITE_CP_ATTRIB(TRIBE_GREEN, ATTR_AWAY_BRAVE, 60)
                     WRITE_CP_ATTRIB(TRIBE_GREEN, ATTR_AWAY_RELIGIOUS, 40)
-                    ATTACK(TRIBE_GREEN, enemyToAttackGreen, 10 + G_RANDOM(18), ATTACK_BUILDING, -1, 400+G_RANDOM(400), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, -1, -1, -1)
+                    ATTACK(TRIBE_GREEN, enemyToAttackGreen, 10 + G_RANDOM(18), ATTACK_BUILDING, -1, 400+G_RANDOM(400), firstSpellGreen, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, -1, -1, -1)
                     shaman_tick_green = GetTurn() + 2048 + G_RANDOM(2048)
                 elseif (_gsi.Players[TRIBE_GREEN].NumPeople > 40 and MANA(TRIBE_GREEN) > 50000 and greenDefended == 0) then
                     WRITE_CP_ATTRIB(TRIBE_GREEN, ATTR_AWAY_MEDICINE_MAN, 100)
                     WRITE_CP_ATTRIB(TRIBE_GREEN, ATTR_AWAY_BRAVE, 60)
                     WRITE_CP_ATTRIB(TRIBE_GREEN, ATTR_AWAY_RELIGIOUS, 40)
-                    ATTACK(TRIBE_GREEN, enemyToAttackGreen, 8 + G_RANDOM(14), ATTACK_BUILDING, -1, 250+G_RANDOM(400), M_SPELL_BLAST, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, -1, -1, -1)
+                    ATTACK(TRIBE_GREEN, enemyToAttackGreen, 8 + G_RANDOM(14), ATTACK_BUILDING, -1, 250+G_RANDOM(400), firstSpellGreen, M_SPELL_BLAST, M_SPELL_BLAST, ATTACK_NORMAL, 0, -1, -1, -1)
                     shaman_tick_green = GetTurn() + 2048 + G_RANDOM(2048)
                 end
             end
